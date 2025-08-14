@@ -16,8 +16,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Important: return true to indicate async response
     return true;
   }
+  if (message.type === "SIGN_TRANS") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { type: "TRANS_SIGN" },
+          (responseFromContent) => {
+            sendResponse({ reply: responseFromContent.reply });
+          }
+        );
+      }
+    });
+    return true;
+  }
 });
-
 
 // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 //   if (message.type === "SEND_TO_CONTENT") {

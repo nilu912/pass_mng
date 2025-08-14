@@ -14,7 +14,7 @@ export default function App() {
     chrome.runtime.sendMessage(
       { type: "CONNECT_WALLET", payload: "connect metamask wallet!" },
       (response) => {
-        console.log("Popup received response:", response.reply.address);
+        console.log("Popup received response:", response.reply);
         setStatus(response.reply);
         chrome.storage.local.set({ walletAddress: response.reply }, () => {
           console.log("Wallet saved to storage");
@@ -28,6 +28,11 @@ export default function App() {
     //     console.log("Popup received response:", response.reply);
     //   }
     // );
+  };
+  const SignTrans = () => {
+    chrome.runtime.sendMessage({ type: "SIGN_TRANS" }, (response) => {
+      console.log("Get response for sign transation", response.reply);
+    });
   };
   const clearData = () => {
     chrome.storage.local.remove("walletAddress", () => {
@@ -47,6 +52,7 @@ export default function App() {
       >
         Connect Wallet
       </button>
+      <button onClick={SignTrans}>SignTrans</button>
       <button onClick={clearData}>clear storage</button>
 
       <div style={{ marginTop: 10, fontSize: 14 }}>

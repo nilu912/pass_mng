@@ -46,61 +46,87 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }, 100);
 
     return true; // Keep message channel open for async sendResponse
-  }
-});
-function injectMetaMaskConnector() {
-  const script = document.createElement("script");
-  script.src = chrome.runtime.getURL("injected.js");
-  script.onload = () => script.remove(); // Clean up after injection
-  (document.head || document.documentElement).appendChild(script);
-}
-
-injectMetaMaskConnector();
-
-// Wait a moment before posting the message to ensure injected.js is loaded
-// setTimeout(() => {
-//   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
-// }, 100); // 100ms delay is usually enough
-
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  // if (message.type === "WALLET_CONNECT") {
-  //   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
-  // }
-  if (message.type === "WALLET_CONNECT") {
-    // Inject the connector if not already injected
-    injectMetaMaskConnector();
-
-    await window.postMessage({ type: "CONNECT_METAMASK" }, "*");
-
-    // Wait a moment before posting the message to injected.js
-    // setTimeout(() => {
-    //   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
-    // }, 100);
-
-    // Listen for response from injected.js
+  } else if (message.type === "TRANS_SIGN") {
+    console.log("get request from TRANS_SIGN");
     const handler = (event) => {
       if (event.source !== window || !event.data) return;
 
-      if (event.data.type === "METAMASK_CONNECTED") {
-        const wallet = event.data.wallet;
-        console.log("Wallet connected:", wallet);
-
-        sendResponse({ reply: wallet });
-        window.removeEventListener("message", handler); // Clean up
+      if (event.data.type === "METAMASK_SIGN_TRANS") {
+        console.log("MetaMask signtransaction:", event.data.Signature);
+        sendResponse({ reply: event.data.Signature.signature });
+        window.removeEventListener("message", handler);
       }
 
       if (event.data.type === "METAMASK_ERROR") {
         console.error("MetaMask error:", event.data.error);
         sendResponse({ reply: "Error: " + event.data.error });
-        window.removeEventListener("message", handler); // Clean up
+        window.removeEventListener("message", handler);
       }
     };
-
     window.addEventListener("message", handler);
-
-    return true; // Keep message channel open for async response
+    setTimeout(() => {
+      console.log("Sending TRANS_SIGN to injected.js");
+      window.postMessage({ type: "SIGN_MESSAGE" }, "*");
+    }, 100);
+    return true;
   }
 });
+// function injectMetaMaskConnector() {
+//   const script = document.createElement("script");
+//   script.src = chrome.runtime.getURL("injected.js");
+//   script.onload = () => script.remove(); // Clean up after injection
+//   (document.head || document.documentElement).appendChild(script);
+// }
+
+// injectMetaMaskConnector();
+
+// // Wait a moment before posting the message to ensure injected.js is loaded
+// // setTimeout(() => {
+// //   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
+// // }, 100); // 100ms delay is usually enough
+
+// chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+//   // if (message.type === "WALLET_CONNECT") {
+//   //   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
+//   // }
+//   if (message.type === "WALLET_CONNECT") {
+//     // Inject the connector if not already injected
+//     injectMetaMaskConnector();
+
+//     await window.postMessage({ type: "CONNECT_METAMASK" }, "*");
+
+//     // Wait a moment before posting the message to injected.js
+//     // setTimeout(() => {
+//     //   window.postMessage({ type: "CONNECT_METAMASK" }, "*");
+//     // }, 100);
+
+//     // Listen for response from injected.js
+//     const handler = (event) => {
+//       if (event.source !== window || !event.data) return;
+
+//       if (event.data.type === "METAMASK_CONNECTED") {
+//         const wallet = event.data.wallet;
+//         console.log("Wallet connected:", wallet);
+
+//         sendResponse({ reply: wallet });
+//         window.removeEventListener("message", handler); // Clean up
+//       }
+
+//       if (event.data.type === "METAMASK_ERROR") {
+//         console.error("MetaMask error:", event.data.error);
+//         sendResponse({ reply: "Error: " + event.data.error });
+//         window.removeEventListener("message", handler); // Clean up
+//       }
+//     };
+
+//     window.addEventListener("message", handler);
+
+//     return true; // Keep message channel open for async response
+//   }
+// });
+
+
+
 // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 //   if (message.type === "WALLET_CONNECT") {
 //     console.log("Content script received:", message.payload);
