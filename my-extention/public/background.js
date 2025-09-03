@@ -7,6 +7,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           { type: "WALLET_CONNECT", payload: message.payload },
           (responseFromContent) => {
             // Send response back to popup
+            if (chrome.runtime.lastError) {
+              console.warn(
+                "Error sending message:",
+                chrome.runtime.lastError.message
+              );
+              sendResponse({ reply: "No content script available" });
+              return;
+            }
+            if (!responseFromContent) {
+              sendResponse({ reply: "No response from content script" });
+              return;
+            }
             sendResponse({ reply: responseFromContent.reply });
           }
         );
