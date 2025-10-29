@@ -6,12 +6,13 @@
   "permissions": ["storage", "activeTab", "scripting"],
   "web_accessible_resources": [
     {
-      "resources": ["index.html", "injected.js"],
+      "resources": ["index.html", "injected.js", "ethers.min.js"],
       "matches": ["<all_urls>"]
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "index.html",

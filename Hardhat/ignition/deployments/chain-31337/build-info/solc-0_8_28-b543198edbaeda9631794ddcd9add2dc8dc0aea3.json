@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-b543198edbaeda9631794ddcd9add2dc8dc0aea3",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/PassMang.sol": "project/contracts/PassMang.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/PassMang.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.23;\r\n\r\ncontract PassMang {\r\n    struct User {\r\n        bytes32 masterPasswordHash;\r\n        bytes32 salt;\r\n        uint timestamp;\r\n        bool isActive;\r\n        uint totalEntries;\r\n    }\r\n    struct PasswordEntry {\r\n        uint id;\r\n        bytes32 uniqueHash;\r\n        string webUrl;\r\n        bytes userName;\r\n        bytes password;\r\n        uint timestamp;\r\n        bool isActive;\r\n    }\r\n\r\n    mapping(address => User) public users;\r\n    mapping(address => bool) public registeredUser;\r\n    mapping(address => PasswordEntry[]) public passwordEntries;\r\n    mapping(bytes32 => bool) public uniqueHashExists;\r\n\r\n    event userRegisteredEvent(\r\n        address user,\r\n        bytes32 hashedPass,\r\n        bytes32 salt,\r\n        uint timestamp\r\n    );\r\n    event passwordAddedEvent(\r\n        address user,\r\n        bytes32 uniqueHash,\r\n        string webUrl,\r\n        bytes userName,\r\n        bytes password,\r\n        uint timestamp\r\n    );\r\n\r\n    modifier isUserReg() {\r\n        require(isUserRegister(), \"User not registered!\");\r\n        _;\r\n    }\r\n\r\n    function generatePassword(\r\n        string memory _password\r\n    ) internal view returns (bytes32 _masterPass, bytes32 _salt) {\r\n        bytes32 salt = keccak256(abi.encodePacked(msg.sender, block.timestamp));\r\n        bytes32 masterPass = keccak256(abi.encodePacked(_password, salt));\r\n        return (masterPass, salt);\r\n    }\r\n    function generateHash(\r\n        bytes memory _input\r\n    ) internal pure returns (bytes32) {\r\n        return keccak256(abi.encodePacked(_input));\r\n    }\r\n    function registerUser(string memory _masterPassword) public {\r\n        require(!registeredUser[msg.sender], \"User already registered!\");\r\n        (bytes32 masterPass, bytes32 salt) = generatePassword(_masterPassword);\r\n        users[msg.sender] = User({\r\n            masterPasswordHash: masterPass,\r\n            salt: salt,\r\n            timestamp: block.timestamp,\r\n            isActive: true,\r\n            totalEntries: 0\r\n        });\r\n        registeredUser[msg.sender] = true;\r\n        emit userRegisteredEvent(msg.sender, masterPass, salt, block.timestamp);\r\n    }\r\n\r\n    function isUserRegister() public view returns (bool) {\r\n        return registeredUser[msg.sender];\r\n    }\r\n\r\n    function addPasswordEntry(\r\n        string memory _webUrl,\r\n        bytes memory _userName,\r\n        bytes memory _password\r\n    ) public isUserReg {\r\n        users[msg.sender].totalEntries++;\r\n        bytes32 uniqueHash = keccak256(abi.encodePacked(_webUrl, _userName));\r\n        require(!uniqueHashExists[uniqueHash], \"Entry already exists!\");\r\n        uniqueHashExists[uniqueHash] = true;\r\n        passwordEntries[msg.sender].push(\r\n            PasswordEntry({\r\n                id: users[msg.sender].totalEntries,\r\n                uniqueHash: uniqueHash,\r\n                webUrl: _webUrl,\r\n                userName: _userName,\r\n                password: _password,\r\n                timestamp: block.timestamp,\r\n                isActive: true\r\n            })\r\n        );\r\n        emit passwordAddedEvent(\r\n            msg.sender,\r\n            uniqueHash,\r\n            _webUrl,\r\n            _userName,\r\n            _password,\r\n            block.timestamp\r\n        );\r\n    }\r\n\r\n    function getUsersAllEntries() public view isUserReg returns(PasswordEntry[] memory){\r\n        return passwordEntries[msg.sender]; \r\n    }\r\n    function getPasswordEntry(uint _id) public view isUserReg returns(PasswordEntry memory){\r\n        require(users[msg.sender].totalEntries >= _id, \"Id not found!\");\r\n        return passwordEntries[msg.sender][_id-1];\r\n    }\r\n    function getUserInfo() public view returns(User memory){\r\n        return users[msg.sender];\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}

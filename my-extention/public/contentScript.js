@@ -71,6 +71,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+
 // function injectMetaMaskConnector() {
 //   const script = document.createElement("script");
 //   script.src = chrome.runtime.getURL("injected.js");
