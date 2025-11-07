@@ -14,8 +14,8 @@ contract PassMang {
         uint id;
         bytes32 uniqueHash;
         string webUrl;
-        bytes userName;
-        bytes password;
+        string userName;
+        string password;
         uint timestamp;
         bool isActive;
     }
@@ -35,8 +35,8 @@ contract PassMang {
         address user,
         bytes32 uniqueHash,
         string webUrl,
-        bytes userName,
-        bytes password,
+        string userName,
+        string password,
         uint timestamp
     );
 
@@ -77,8 +77,10 @@ contract PassMang {
 
     function addPasswordEntry(
         string memory _webUrl,
-        bytes memory _userName,
-        bytes memory _password
+        // bytes memory _userName,
+        // bytes memory _password
+        string memory _userName,
+        string memory _password
     ) public isUserReg {
         users[msg.sender].totalEntries++;
         bytes32 uniqueHash = keccak256(abi.encodePacked(_webUrl, _userName));

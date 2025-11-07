@@ -2,6 +2,7 @@ import { useContext, createContext, useState, useEffect } from "react";
 import { sha256 } from "js-sha256";
 const authContext = createContext();
 export const useAuth = () => useContext(authContext);
+import { abi } from "../contract/PassMang.json";
 
 const AuthProvider = ({ children }) => {
   const [page, setPage] = useState("login");
@@ -10,19 +11,17 @@ const AuthProvider = ({ children }) => {
   const [contract, setContract] = useState(null);
   const [contractStatus, setContractStatus] = useState(false);
   const [WalletStatus, setWalletStatus] = useState(false);
+
   useEffect(() => {
     console.log("calling use effect form authContext");
     chrome.storage.local.get("walletAddress", (data) => {
       console.log(data);
-      if(data.walletAddress != undefined)
-        setWalletStatus(true);
-    })
+      if (data.walletAddress != undefined) setWalletStatus(true);
+    });
     chrome.storage.local.get("contractStatus", (data) => {
       console.log(data.contractStatus);
-      if(data.contractStatus == undefined)
-        setContractStatus(false);
-      else
-        setContractStatus(true);
+      if (data.contractStatus == undefined) setContractStatus(false);
+      else setContractStatus(true);
     });
   }, []);
 
@@ -45,16 +44,56 @@ const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = (userData) => {
-    const hashPass = chrome.storage.local.get("passHash", (data) => {
-      const hashedPassword = sha256(userData.password);
-      if (data.passHash === hashedPassword) {
-        setPage("dashboard");
-        setUser(userData);
-        chrome.storage.local.set({ user: userData });
-      } else {
-        alert("Invalid Password");
-      }
-    });
+    try {
+      chrome.storage.local.get("passHash", (data) => {
+        const hashedPassword = sha256(userData.password);
+        if (data.passHash === hashedPassword) {
+          chrome.runtime.sendMessage(
+            {
+              type: "CALL_CONTRACT_FUNCTION",
+              payload: {
+                contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
+                abi: abi,
+                functionName: "isUserRegister",
+                args: [],
+              },
+            },
+            (response) => {
+              if (!response.success) {
+                console.error(
+                  "Runtime error:",
+                  chrome.runtime.lastError?.message || response.error
+                );
+                return;
+              }
+              console.log("Get response for call function", response);
+              if (response.data) {
+                setPage("dashboard");
+                setUser(userData);
+                chrome.storage.local.set({ user: userData });
+              } else {
+                alert("User not registered!");
+                return;
+              }
+            }
+          );
+        } else {
+          alert("Invalid Password");
+        }
+      });
+    } catch (err) {
+      console.error("Error during login:", err);
+    }
+    // const hashPass = chrome.storage.local.get("passHash", (data) => {
+    //   const hashedPassword = sha256(userData.password);
+    //   if (data.passHash === hashedPassword) {
+    //     setPage("dashboard");
+    //     setUser(userData);
+    //     chrome.storage.local.set({ user: userData });
+    //   } else {
+    //     alert("Invalid Password");
+    //   }
+    // });
   };
   const logout = () => {
     setUser(null);
@@ -62,15 +101,88 @@ const AuthProvider = ({ children }) => {
     chrome.storage.local.remove("user");
     chrome.storage.local.remove("page");
   };
+  // const createAccount = async (userData) => {
+  //   const { passHash } = await chrome.storage.local.get("passHash");
+  //   const hashedPassword = sha256(userData.password);
+
+  //   chrome.runtime.sendMessage(
+  //     {
+  //       type: "CALL_CONTRACT_FUNCTION",
+  //       payload: {
+  //         contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
+  //         abi: abi,
+  //         functionName: "registerUser",
+  //         args: [hashedPassword],
+  //       },
+  //     },
+  //     (response) => {
+  //       if (!response.success) {
+  //         console.error(
+  //           "Runtime error:",
+  //           chrome.runtime.lastError?.message || response.error
+  //         );
+  //         return;
+  //       }
+  //       console.log("Get response for call function", response);
+  //     }
+  //   );
+
+  //   // const hashedPassword = sha256(userData.password);
+  //   if (passHash) {
+  //     return alert("Account already exists");
+  //   }
+  //   await chrome.storage.local.set({ passHash: hashedPassword });
+  // };
+
+  // ... in AuthProvider.js
+
   const createAccount = async (userData) => {
+    // 1. Check for existing local password hash FIRST (best practice for UX)
     const { passHash } = await chrome.storage.local.get("passHash");
     if (passHash) {
-      return alert("Account already exists");
+      return alert("Account already exists"); // Prevents multiple registrations in local storage
     }
-    const hashedPassword = sha256(userData.password);
-    await chrome.storage.local.set({ passHash: hashedPassword });
-  };
 
+    const hashedPassword = sha256(userData.password);
+
+    // The previous code had the storage check *after* the contract call block,
+    // and the contract call was not awaited, causing flow issues.
+
+    // 2. Send the transaction and await the response from the background script
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          type: "CALL_CONTRACT_FUNCTION",
+          payload: {
+            contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
+            abi: abi,
+            functionName: "registerUser",
+            args: [hashedPassword],
+          },
+        },
+        resolve
+      );
+    });
+
+    // 3. Handle the response
+    if (!response || !response.success) {
+      console.error(
+        "Runtime error during registerUser:",
+        chrome.runtime.lastError?.message || (response && response.error)
+      );
+      // The Unauthorized (4100) error likely occurs here if the user rejects the MetaMask popup.
+      // Alert the user so they know they need to approve the wallet popup.
+      alert("Registration failed. Did you approve the MetaMask transaction?");
+      return;
+    }
+
+    console.log("Get response for call function", response);
+
+    // 4. ONLY IF the contract call succeeded, save the local hash.
+    // This assumes the contract call succeeding is the final step for "account creation".
+    await chrome.storage.local.set({ passHash: hashedPassword });
+    alert("Account created! Please log in."); // Provide feedback
+  };
   const connectWallet = async () => {
     // popup.js
     try {
@@ -141,7 +253,7 @@ const AuthProvider = ({ children }) => {
         contractStatus,
         connectContract,
         WalletStatus,
-        setContractStatus
+        setContractStatus,
       }}
     >
       {children}
