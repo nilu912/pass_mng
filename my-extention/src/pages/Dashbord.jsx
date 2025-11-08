@@ -218,8 +218,81 @@ const Dashboard = () => {
 
   // Update this function in your Dashboard.jsx
 
+  // Add these state variables at the top with your other states
+  const [filteredEntries, setFilteredEntries] = useState([]);
+  const [currentSiteUrl, setCurrentSiteUrl] = useState("");
+  const [autoFillEnabled, setAutoFillEnabled] = useState(false);
+
+  const setAutoFillHandler = () => {
+    chrome.storage.local.set({
+      autoFillEnabled: !autoFillEnabled,
+    });
+
+    setAutoFillEnabled(!autoFillEnabled);
+  };
+  // Add this useEffect to auto-fetch entries when component mounts
+  useEffect(() => {
+    // Auto-fetch entries when dashboard loads
+    chrome.storage.local.get("autoFillEnabled", (data) => {
+      if (data) {
+        setAutoFillEnabled(data.autoFillEnabled);
+      }
+    });
+    fetchAndDecryptEntries();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Add this useEffect to filter and auto-fill based on current URL
+  useEffect(() => {
+    if (decryptedEntries.length === 0) return;
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        try {
+          const url = new URL(tabs[0].url);
+          const hostname = url.hostname.replace("www.", "");
+          setCurrentSiteUrl(hostname);
+          console.log("📍 Current site:", hostname);
+
+          // Filter entries that match current site
+          const matching = decryptedEntries.filter((entry) => {
+            let savedHostname = entry.url;
+            try {
+              const savedUrl = new URL(
+                entry.url.startsWith("http")
+                  ? entry.url
+                  : `https://${entry.url}`
+              );
+              savedHostname = savedUrl.hostname.replace("www.", "");
+            } catch (e) {
+              savedHostname = entry.url.replace("www.", "").toLowerCase();
+            }
+
+            return (
+              hostname.includes(savedHostname) ||
+              savedHostname.includes(hostname)
+            );
+          });
+
+          setFilteredEntries(matching);
+          console.log(
+            `🔍 Found ${matching.length} matching credentials for ${hostname}`
+          );
+
+          // Auto-fill if there's exactly one match and auto-fill is enabled
+          if (matching.length === 1 && autoFillEnabled) {
+            console.log("🚀 Auto-filling credentials...");
+            setTimeout(() => {
+              autofill(matching[0]);
+            }, 500); // Small delay to ensure page is ready
+          }
+        } catch (error) {
+          console.error("Error processing current tab URL:", error);
+        }
+      }
+    });
+  }, [decryptedEntries, autoFillEnabled]); // Re-run when entries change or auto-fill is toggled
   const autofill = async (entry) => {
-    // Check if username and password are valid (not error messages)
+    // Check if username and password are valid
     if (
       entry.userName.includes("[Error") ||
       entry.userName.includes("[Invalid") ||
@@ -250,55 +323,165 @@ const Dashboard = () => {
         return;
       }
 
-      console.log("Attempting autofill on:", tab.url);
+      // Extract hostname from current tab
+      const currentUrl = new URL(tab.url);
+      const currentHostname = currentUrl.hostname.replace("www.", "");
 
-      // First, ensure content script is injected
+      // Extract hostname from saved entry
+      let savedHostname = entry.url;
       try {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ["contentScript.js"],
-        });
-        console.log("Content script injected successfully");
-      } catch (injectError) {
-        // Content script might already be injected, that's okay
-        console.log(
-          "Content script already injected or injection failed:",
-          injectError.message
+        // Try to parse as full URL
+        const savedUrl = new URL(
+          entry.url.startsWith("http") ? entry.url : `https://${entry.url}`
         );
+        savedHostname = savedUrl.hostname.replace("www.", "");
+      } catch (e) {
+        // If parsing fails, treat it as hostname directly
+        savedHostname = entry.url.replace("www.", "").toLowerCase();
       }
 
-      // Wait a moment for content script to initialize
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      console.log("🔍 URL Matching:", {
+        current: currentHostname,
+        saved: savedHostname,
+        fullCurrentUrl: tab.url,
+      });
 
-      // Now send the autofill message
-      chrome.tabs.sendMessage(
-        tab.id,
-        {
-          type: "AUTOFILL",
-          username: entry.userName,
-          password: entry.password,
-        },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error("Autofill error:", chrome.runtime.lastError);
-            setErrorMessage(
-              "Could not autofill. Make sure you're on a login page and try refreshing the page."
-            );
-          } else if (response && response.success) {
-            setSuccessMessage("✅ Credentials filled successfully!");
-            console.log("Autofill successful:", response.message);
-          } else {
-            setErrorMessage(
-              response?.message || "No login fields found on this page"
-            );
+      // Check if URLs match
+      if (
+        !currentHostname.includes(savedHostname) &&
+        !savedHostname.includes(currentHostname)
+      ) {
+        setErrorMessage(
+          `❌ URL mismatch!\nCurrent site: ${currentHostname}\nSaved for: ${savedHostname}\n\nThis credential is for a different website.`
+        );
+        console.warn("URL mismatch - autofill blocked");
+        return;
+      }
+
+      console.log("✅ URL matched - proceeding with autofill");
+
+      // Inject autofill code directly into the page
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (username, password) => {
+          // Find username field
+          function findUsernameField() {
+            const selectors = [
+              'input[type="email"]',
+              'input[type="text"][name*="email" i]',
+              'input[type="text"][name*="user" i]',
+              'input[type="text"][id*="email" i]',
+              'input[type="text"][id*="user" i]',
+              'input[placeholder*="email" i]',
+              'input[placeholder*="username" i]',
+              'input[autocomplete="username"]',
+              'input[autocomplete="email"]',
+              'input[name="username"]',
+              'input[name="email"]',
+              'input[id="username"]',
+              'input[id="email"]',
+            ];
+
+            for (const selector of selectors) {
+              const field = document.querySelector(selector);
+              if (field && field.offsetWidth > 0) {
+                return field;
+              }
+            }
+
+            const textInputs = document.querySelectorAll('input[type="text"]');
+            for (const input of textInputs) {
+              if (input.offsetWidth > 0) {
+                return input;
+              }
+            }
+
+            return null;
           }
-        }
-      );
+
+          // Find password field
+          function findPasswordField() {
+            const passwordFields = document.querySelectorAll(
+              'input[type="password"]'
+            );
+            for (const field of passwordFields) {
+              if (field.offsetWidth > 0) {
+                return field;
+              }
+            }
+            return null;
+          }
+
+          // Fill input field
+          function fillInputField(field, value) {
+            field.value = value;
+
+            const events = [
+              new Event("input", { bubbles: true }),
+              new Event("change", { bubbles: true }),
+              new Event("blur", { bubbles: true }),
+            ];
+
+            events.forEach((event) => field.dispatchEvent(event));
+
+            try {
+              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                window.HTMLInputElement.prototype,
+                "value"
+              ).set;
+              nativeInputValueSetter.call(field, value);
+              field.dispatchEvent(new Event("input", { bubbles: true }));
+            } catch (e) {
+              // React setter not needed
+            }
+          }
+
+          // Perform autofill
+          const usernameField = findUsernameField();
+          const passwordField = findPasswordField();
+
+          let filled = false;
+
+          if (usernameField) {
+            fillInputField(usernameField, username);
+            filled = true;
+            console.log("✅ Username filled");
+          }
+
+          if (passwordField) {
+            fillInputField(passwordField, password);
+            filled = true;
+            console.log("✅ Password filled");
+          }
+
+          return {
+            success: filled,
+            message: filled
+              ? "Credentials filled successfully"
+              : "No login fields found on this page",
+            foundUsername: !!usernameField,
+            foundPassword: !!passwordField,
+          };
+        },
+        args: [entry.userName, entry.password],
+      });
+
+      const result = results[0].result;
+
+      if (result.success) {
+        setSuccessMessage(
+          `✅ Credentials filled successfully on ${currentHostname}!`
+        );
+        console.log("Autofill successful:", result);
+      } else {
+        setErrorMessage(result.message);
+        console.warn("Autofill failed:", result);
+      }
     } catch (error) {
-      console.error("Autofill error:", error);
+      console.error("❌ Autofill error:", error);
       setErrorMessage("Error: " + error.message);
     }
-  }; // Clear messages after 5 seconds
+  };
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => setErrorMessage(""), 5000);
@@ -712,49 +895,53 @@ const Dashboard = () => {
         </div>
 
         {/* Alert Messages */}
-        {errorMessage && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg shadow-md flex items-start gap-3">
-            <Alert className="text-red-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-red-800 font-medium">Error</p>
-              <p className="text-red-700 text-sm mt-1">{errorMessage}</p>
+        <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-xs">
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-400 text-red-700 px-3 py-2 rounded-md shadow-sm flex items-start gap-2 text-xs">
+              <Alert className="text-red-500 flex-shrink-0 w-3 h-3 mt-0.5" />
+              <p className="flex-1 leading-tight">{errorMessage}</p>
+              <button
+                onClick={() => setErrorMessage("")}
+                className="text-red-500 hover:text-red-700 flex-shrink-0"
+              >
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={() => setErrorMessage("")}
-              className="text-red-500 hover:text-red-700"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
+          )}
 
-        {successMessage && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg shadow-md flex items-start gap-3">
-            <Check className="text-green-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-green-800 font-medium">Success</p>
-              <p className="text-green-700 text-sm mt-1">{successMessage}</p>
+          {successMessage && (
+            <div className="bg-green-50 border border-green-400 text-green-700 px-3 py-2 rounded-md shadow-sm flex items-start gap-2 text-xs">
+              <Check className="text-green-500 flex-shrink-0 w-3 h-3 mt-0.5" />
+              <p className="flex-1 leading-tight">{successMessage}</p>
+              <button
+                onClick={() => setSuccessMessage("")}
+                className="text-green-500 hover:text-green-700 flex-shrink-0"
+              >
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={() => setSuccessMessage("")}
-              className="text-green-500 hover:text-green-700"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Forms */}
@@ -899,7 +1086,47 @@ const Dashboard = () => {
                   />
                 </button>
               </div>
+              {/* Add this inside the "Saved Passwords" card, before the Total Entries div */}
 
+              <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">
+                        Auto-fill
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Fill credentials automatically
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAutoFillHandler()}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                      autoFillEnabled ? "bg-green-500" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        autoFillEnabled ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
               <div className="mb-4">
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-4 text-center">
                   <div className="text-4xl font-bold">
@@ -1031,185 +1258,6 @@ const Dashboard = () => {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Full Width Detailed View */}
-        <div className="mt-6 bg-white rounded-2xl shadow-xl p-6 border border-indigo-100">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-800">
-              Detailed Password Entries
-            </h3>
-            <button
-              onClick={fetchAndDecryptEntries}
-              disabled={isLoading}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2.5 px-5 rounded-xl transition-all duration-200 font-medium disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"
-            >
-              <RefreshCw
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              {isLoading ? "Loading..." : "Refresh All"}
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {decryptedEntries.length === 0 ? (
-              <div className="text-center py-16 text-gray-500">
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Lock className="w-12 h-12 text-indigo-300" />
-                </div>
-                <p className="text-lg font-semibold mb-2">
-                  No password entries found
-                </p>
-                <p className="text-sm text-gray-400">
-                  Add your first password to get started with secure storage!
-                </p>
-              </div>
-            ) : (
-              decryptedEntries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="border-2 border-gray-100 rounded-2xl p-6 hover:border-indigo-200 hover:shadow-lg transition-all bg-gradient-to-br from-white via-gray-50 to-indigo-50"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Website URL
-                        </label>
-                        <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
-                          <Globe className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                          <span className="font-semibold text-gray-800 truncate">
-                            {entry.url}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Entry ID
-                        </label>
-                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span className="font-mono text-sm text-gray-700">
-                            #{entry.id}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Username / Email
-                        </label>
-                        <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
-                          <User className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                          <span className="font-mono text-sm text-gray-800 truncate flex-1">
-                            {entry.userName}
-                          </span>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(
-                                entry.userName,
-                                `user-detail-${entry.id}`
-                              )
-                            }
-                            className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
-                            title="Copy username"
-                          >
-                            {copiedField === `user-detail-${entry.id}` ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-indigo-600" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Password
-                        </label>
-                        <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
-                          <Lock className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                          <span className="font-mono text-sm text-gray-800 flex-1">
-                            {showPasswords[entry.id]
-                              ? entry.password
-                              : "••••••••••••"}
-                          </span>
-                          <button
-                            onClick={() => togglePasswordVisibility(entry.id)}
-                            className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
-                            title={
-                              showPasswords[entry.id]
-                                ? "Hide password"
-                                : "Show password"
-                            }
-                          >
-                            {showPasswords[entry.id] ? (
-                              <EyeOff className="w-4 h-4 text-indigo-600" />
-                            ) : (
-                              <Eye className="w-4 h-4 text-indigo-600" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(
-                                entry.password,
-                                `pass-detail-${entry.id}`
-                              )
-                            }
-                            className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
-                            title="Copy password"
-                          >
-                            {copiedField === `pass-detail-${entry.id}` ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-indigo-600" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Date Added
-                        </label>
-                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span className="text-sm text-gray-700">
-                            {entry.timestamp}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-                          Status
-                        </label>
-                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                              entry.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
-                          >
-                            <span
-                              className={`w-2 h-2 rounded-full mr-2 ${
-                                entry.isActive ? "bg-green-500" : "bg-red-500"
-                              }`}
-                            ></span>
-                            {entry.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </div>
