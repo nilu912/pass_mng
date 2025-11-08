@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
+import { BlockchainLoading } from "../components/BlockchainLoading";
 
 const Login = () => {
   const [data, setData] = useState({ password: "", confirmPassword: "" });
@@ -11,7 +12,9 @@ const Login = () => {
     connectWallet,
     WalletStatus,
     setPage,
-    setWalletStatus
+    setWalletStatus,
+    isLoading,
+    setIsLoading,
   } = useAuth();
   // useEffect(()=>{
 
@@ -25,6 +28,7 @@ const Login = () => {
   };
 
   const onSubmitHandler = async (e) => {
+    setIsLoading(true);
     e.preventDefault();
     try {
       if (isLogin) {
@@ -43,9 +47,33 @@ const Login = () => {
     } finally {
       console.log("in finally block");
       setData({ password: "", confirmPassword: "" });
+      setIsLoading(false);
     }
     // console.log(data);
   };
+
+  if (isLoading) {
+    // ✅ Fixed:
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
+        {/* Show loading overlay when loading or updating */}
+        {(isLoading || isSubmitting || isUpdating) && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8">
+              <BlockchainLoading
+                message={isLoading && "Loading, please wait..."}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-7xl mx-auto">
+          {/* Rest of your dashboard content */}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 h-full w-full p-4 rounded flex flex-col justify-center items-center">
       <div className="w-full max-w-xs h-[50%]">

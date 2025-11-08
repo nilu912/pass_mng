@@ -271,6 +271,80 @@ async function connectSmartContract(sendResponse) {
           },
           {
             indexed: false,
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "uniqueHash",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        name: "passwordDeletedEvent",
+        type: "event",
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "address",
+            name: "user",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "oldHash",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "newHash",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "string",
+            name: "webUrl",
+            type: "string",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        name: "passwordUpdatedEvent",
+        type: "event",
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "address",
+            name: "user",
+            type: "address",
+          },
+          {
+            indexed: false,
             internalType: "bytes32",
             name: "hashedPass",
             type: "bytes32",
@@ -310,6 +384,19 @@ async function connectSmartContract(sendResponse) {
           },
         ],
         name: "addPasswordEntry",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "uint256",
+            name: "_id",
+            type: "uint256",
+          },
+        ],
+        name: "deletePasswordEntry",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
@@ -530,6 +617,32 @@ async function connectSmartContract(sendResponse) {
       {
         inputs: [
           {
+            internalType: "uint256",
+            name: "_id",
+            type: "uint256",
+          },
+        ],
+        name: "permanentlyDeleteEntry",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "uint256",
+            name: "_id",
+            type: "uint256",
+          },
+        ],
+        name: "reactivateEntry",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
             internalType: "string",
             name: "_masterPassword",
             type: "string",
@@ -576,6 +689,34 @@ async function connectSmartContract(sendResponse) {
           },
         ],
         stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "uint256",
+            name: "_id",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "_webUrl",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "_userName",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "_password",
+            type: "string",
+          },
+        ],
+        name: "updatePasswordEntry",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
       },
       {

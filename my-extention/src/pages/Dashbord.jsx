@@ -12,18 +12,22 @@ import {
   Copy,
   Check,
   Alert,
+  Edit,
+  X,
+  Save,
 } from "../utils/svgIcons.jsx";
 import { encryptData, decryptData } from "../utils/EncDecFuncs.jsx";
+import { BlockchainLoading } from "../components/BlockchainLoading.jsx";
 
 const Dashboard = () => {
-  const { logout, connectWallet } = useAuth();
+  const { logout, connectWallet, isLoading, setIsLoading } = useAuth();
   const [form, setForm] = useState({
     url: "",
     userName: "",
     password: "",
   });
   const [decryptedEntries, setDecryptedEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswords, setShowPasswords] = useState({});
   const [copiedField, setCopiedField] = useState(null);
@@ -31,8 +35,13 @@ const Dashboard = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [autoFillEnabled, setAutoFillEnabled] = useState(false);
-  // const [currentSiteUrl, setCurrentSiteUrl] = useState("");
-
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [editForm, setEditForm] = useState({
+    url: "",
+    userName: "",
+    password: "",
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
   useEffect(() => {
     chrome.storage.local.get("walletAddress", (data) => {
       setWalletAddress(data.walletAddress);
@@ -56,6 +65,7 @@ const Dashboard = () => {
     });
     setAutoFillEnabled(!autoFillEnabled);
   };
+
   useEffect(() => {
     if (decryptedEntries.length === 0) return;
 
@@ -317,7 +327,94 @@ const Dashboard = () => {
       [name]: value,
     });
   };
+  const startEdit = (entry) => {
+    setEditingEntry(entry.id);
+    setEditForm({
+      url: entry.url,
+      userName: entry.userName,
+      password: entry.password,
+    });
+  };
+  const editInputHandler = (e) => {
+    const { name, value } = e.target;
+    setEditForm({
+      ...editForm,
+      [name]: value,
+    });
+  };
 
+  const cancelEdit = () => {
+    setEditingEntry(null);
+    setEditForm({
+      url: "",
+      userName: "",
+      password: "",
+    });
+  };
+
+  const updateHandler = async (entryId) => {
+    if (!editForm.url || !editForm.userName || !editForm.password) {
+      setErrorMessage("Please fill in all fields");
+      return;
+    }
+
+    setIsUpdating(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      console.log("\n=== Starting Update Process ===");
+
+      // Encrypt username and password
+      const encryptedUserName = encryptData(editForm.userName);
+      const encryptedPassword = encryptData(editForm.password);
+
+      console.log("📦 Updated data prepared for blockchain:", {
+        entryId: entryId,
+        url: editForm.url,
+      });
+
+      chrome.runtime.sendMessage(
+        {
+          type: "CALL_CONTRACT_FUNCTION",
+          payload: {
+            contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
+            abi: abi,
+            functionName: "updatePasswordEntry",
+            args: [
+              parseInt(entryId), // Make sure it's a number
+              editForm.url,
+              encryptedUserName,
+              encryptedPassword,
+            ],
+          },
+        },
+        (response) => {
+          setIsUpdating(false);
+
+          if (chrome.runtime.lastError || !response?.success) {
+            const errorMsg =
+              chrome.runtime.lastError?.message ||
+              response?.error ||
+              "Unknown error";
+            console.error("❌ Update failed:", errorMsg);
+            setErrorMessage(`Failed to update: ${errorMsg}`);
+            return;
+          }
+
+          console.log("✅ Password entry updated:", response);
+          setSuccessMessage("Password entry updated successfully!");
+
+          cancelEdit();
+          setTimeout(() => fetchAndDecryptEntries(), 1000);
+        }
+      );
+    } catch (error) {
+      setIsUpdating(false);
+      console.error("❌ Error in update:", error);
+      setErrorMessage("Error: " + error.message);
+    }
+  };
   const submitHandler = async () => {
     if (!form.url || !form.userName || !form.password) {
       setErrorMessage("Please fill in all fields");
@@ -445,18 +542,6 @@ const Dashboard = () => {
           setErrorMessage("Invalid data format from contract");
           return;
         }
-
-        // Process entries based on Solidity struct:
-        // struct PasswordEntry {
-        //     uint id;              // index 0
-        //     bytes32 uniqueHash;   // index 1
-        //     string webUrl;        // index 2
-        //     string userName;      // index 3 (encrypted)
-        //     string password;      // index 4 (encrypted)
-        //     uint timestamp;       // index 5
-        //     bool isActive;        // index 6
-        // }
-
         const decrypted = response.data.map((entry, idx) => {
           try {
             console.log(`\n--- Processing Entry ${idx + 1} ---`);
@@ -829,113 +914,226 @@ const Dashboard = () => {
                     </p>
                   </div>
                 ) : (
-                  decryptedEntries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="border-2 border-gray-100 rounded-xl p-3 hover:border-indigo-200 hover:shadow-md transition-all bg-gradient-to-br from-white to-gray-50"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Globe className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                          <span className="font-semibold text-gray-800 truncate text-sm">
-                            {entry.url}
-                          </span>
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
-                            entry.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {entry.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <User className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                          <span className="font-mono text-xs text-gray-700 truncate flex-1">
-                            {entry.userName}
-                          </span>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(
-                                entry.userName,
-                                `user-${entry.id}`
-                              )
-                            }
-                            className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                            title="Copy username"
-                          >
-                            {copiedField === `user-${entry.id}` ? (
-                              <Check className="w-3.5 h-3.5 text-green-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5 text-gray-500" />
-                            )}
-                          </button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Lock className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                          <span className="font-mono text-xs text-gray-700 flex-1">
-                            {showPasswords[entry.id]
-                              ? entry.password
-                              : "••••••••"}
-                          </span>
-                          <button
-                            onClick={() => togglePasswordVisibility(entry.id)}
-                            className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                            title={showPasswords[entry.id] ? "Hide" : "Show"}
-                          >
-                            {showPasswords[entry.id] ? (
-                              <EyeOff className="w-3.5 h-3.5 text-gray-500" />
-                            ) : (
-                              <Eye className="w-3.5 h-3.5 text-gray-500" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(
-                                entry.password,
-                                `pass-${entry.id}`
-                              )
-                            }
-                            className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                            title="Copy password"
-                          >
-                            {copiedField === `pass-${entry.id}` ? (
-                              <Check className="w-3.5 h-3.5 text-green-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5 text-gray-500" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                      {/* In the password entry card */}
-                      <button
-                        onClick={() => autofill(entry)}
-                        className="w-full mt-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 px-4 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  <>
+                    {decryptedEntries.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className={`border-2 rounded-xl p-3 hover:shadow-md transition-all ${
+                          editingEntry === entry.id
+                            ? "border-indigo-400 bg-indigo-50"
+                            : "border-gray-100 bg-gradient-to-br from-white to-gray-50"
+                        }`}
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 10V3L4 14h7v7l9-11h-7z"
-                          />
-                        </svg>
-                        Fill Data
-                      </button>{" "}
-                      <div className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">
-                        {entry.timestamp}
+                        {editingEntry === entry.id ? (
+                          // Edit Mode
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                                Editing Entry
+                              </span>
+                              <button
+                                onClick={cancelEdit}
+                                className="text-gray-400 hover:text-gray-600"
+                                title="Cancel edit"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* URL Input */}
+                            <div>
+                              <label className="text-xs font-semibold text-gray-600 mb-1 block">
+                                Website URL
+                              </label>
+                              <input
+                                type="text"
+                                name="url"
+                                value={editForm.url}
+                                onChange={editInputHandler}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                              />
+                            </div>
+
+                            {/* Username Input */}
+                            <div>
+                              <label className="text-xs font-semibold text-gray-600 mb-1 block">
+                                Username / Email
+                              </label>
+                              <input
+                                type="text"
+                                name="userName"
+                                value={editForm.userName}
+                                onChange={editInputHandler}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                              />
+                            </div>
+
+                            {/* Password Input */}
+                            <div>
+                              <label className="text-xs font-semibold text-gray-600 mb-1 block">
+                                Password
+                              </label>
+                              <input
+                                type="text"
+                                name="password"
+                                value={editForm.password}
+                                onChange={editInputHandler}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                              />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 pt-2">
+                              <button
+                                onClick={() => updateHandler(entry.id)}
+                                disabled={isUpdating}
+                                className="flex-1 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white py-2 px-3 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              >
+                                {isUpdating ? (
+                                  <>
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                    Updating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="w-4 h-4" />
+                                    Save Changes
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                disabled={isUpdating}
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          // View Mode
+                          <>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Globe className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                                <span className="font-semibold text-gray-800 truncate text-sm">
+                                  {entry.url}
+                                </span>
+                              </div>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                                  entry.isActive
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {entry.isActive ? "Active" : "Inactive"}
+                              </span>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <User className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                                <span className="font-mono text-xs text-gray-700 truncate flex-1">
+                                  {entry.userName}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    copyToClipboard(
+                                      entry.userName,
+                                      `user-${entry.id}`
+                                    )
+                                  }
+                                  className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                  title="Copy username"
+                                >
+                                  {copiedField === `user-${entry.id}` ? (
+                                    <Check className="w-3.5 h-3.5 text-green-600" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5 text-gray-500" />
+                                  )}
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Lock className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                                <span className="font-mono text-xs text-gray-700 flex-1">
+                                  {showPasswords[entry.id]
+                                    ? entry.password
+                                    : "••••••••"}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    togglePasswordVisibility(entry.id)
+                                  }
+                                  className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                  title={
+                                    showPasswords[entry.id] ? "Hide" : "Show"
+                                  }
+                                >
+                                  {showPasswords[entry.id] ? (
+                                    <EyeOff className="w-3.5 h-3.5 text-gray-500" />
+                                  ) : (
+                                    <Eye className="w-3.5 h-3.5 text-gray-500" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    copyToClipboard(
+                                      entry.password,
+                                      `pass-${entry.id}`
+                                    )
+                                  }
+                                  className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                  title="Copy password"
+                                >
+                                  {copiedField === `pass-${entry.id}` ? (
+                                    <Check className="w-3.5 h-3.5 text-green-600" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5 text-gray-500" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => autofill(entry)}
+                                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 px-4 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                                  />
+                                </svg>
+                                Fill
+                              </button>
+                              <button
+                                onClick={() => startEdit(entry)}
+                                className="px-3 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                title="Edit entry"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            <div className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">
+                              {entry.timestamp}
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </div>
-                  ))
+                    ))}{" "}
+                  </>
                 )}
               </div>
             </div>

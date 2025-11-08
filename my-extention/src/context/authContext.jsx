@@ -12,6 +12,7 @@ const AuthProvider = ({ children }) => {
   const [contract, setContract] = useState(null);
   const [contractStatus, setContractStatus] = useState(false);
   const [WalletStatus, setWalletStatus] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("calling use effect form authContext");
@@ -63,6 +64,7 @@ const AuthProvider = ({ children }) => {
       });
     };
     loginHandller();
+    setIsLoading(false);
   }, []);
 
   // useEffect(() => {
@@ -84,6 +86,7 @@ const AuthProvider = ({ children }) => {
   // }, [user]);
 
   const login = (userData) => {
+    setIsLoading(true);
     try {
       chrome.storage.local.get("passHash", (data) => {
         // const hashedPassword = sha256(userData.password);
@@ -110,9 +113,12 @@ const AuthProvider = ({ children }) => {
               }
               console.log("Get response for call function", response);
               if (response.data) {
-                chrome.storage.local.set({ token: sha256(hashedPassword) }, () => {
-                  console.log("Token saved to storage");
-                });
+                chrome.storage.local.set(
+                  { token: sha256(hashedPassword) },
+                  () => {
+                    console.log("Token saved to storage");
+                  }
+                );
                 setPage("dashboard");
                 setUser(userData);
                 // chrome.storage.local.set({ user: userData });
@@ -128,17 +134,9 @@ const AuthProvider = ({ children }) => {
       });
     } catch (err) {
       console.error("Error during login:", err);
+    } finally {
+      setIsLoading(false);
     }
-    // const hashPass = chrome.storage.local.get("passHash", (data) => {
-    //   const hashedPassword = sha256(userData.password);
-    //   if (data.passHash === hashedPassword) {
-    //     setPage("dashboard");
-    //     setUser(userData);
-    //     chrome.storage.local.set({ user: userData });
-    //   } else {
-    //     alert("Invalid Password");
-    //   }
-    // });
   };
   const logout = () => {
     setUser(null);
@@ -147,42 +145,8 @@ const AuthProvider = ({ children }) => {
     chrome.storage.local.remove("page");
     chrome.storage.local.remove("token");
   };
-  // const createAccount = async (userData) => {
-  //   const { passHash } = await chrome.storage.local.get("passHash");
-  //   const hashedPassword = sha256(userData.password);
-
-  //   chrome.runtime.sendMessage(
-  //     {
-  //       type: "CALL_CONTRACT_FUNCTION",
-  //       payload: {
-  //         contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
-  //         abi: abi,
-  //         functionName: "registerUser",
-  //         args: [hashedPassword],
-  //       },
-  //     },
-  //     (response) => {
-  //       if (!response.success) {
-  //         console.error(
-  //           "Runtime error:",
-  //           chrome.runtime.lastError?.message || response.error
-  //         );
-  //         return;
-  //       }
-  //       console.log("Get response for call function", response);
-  //     }
-  //   );
-
-  //   // const hashedPassword = sha256(userData.password);
-  //   if (passHash) {
-  //     return alert("Account already exists");
-  //   }
-  //   await chrome.storage.local.set({ passHash: hashedPassword });
-  // };
-
-  // ... in AuthProvider.js
-
   const createAccount = async (userData) => {
+    setIsLoading(true);
     // 1. Check for existing local password hash FIRST (best practice for UX)
     const { passHash } = await chrome.storage.local.get("passHash");
     if (passHash) {
@@ -231,8 +195,10 @@ const AuthProvider = ({ children }) => {
     // This assumes the contract call succeeding is the final step for "account creation".
     await chrome.storage.local.set({ passHash: hashedPassword });
     alert("Account created! Please log in."); // Provide feedback
+    setIsLoading(false);
   };
   const connectWallet = async () => {
+    setIsLoading(true);
     // popup.js
     try {
       chrome.runtime.sendMessage(
@@ -249,6 +215,8 @@ const AuthProvider = ({ children }) => {
       );
     } catch (err) {
       console.error("Error connecting wallet:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -305,6 +273,8 @@ const AuthProvider = ({ children }) => {
         WalletStatus,
         setWalletStatus,
         setContractStatus,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}
