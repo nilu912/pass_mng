@@ -3,6 +3,7 @@ import { sha256 } from "js-sha256";
 const authContext = createContext();
 export const useAuth = () => useContext(authContext);
 import { abi } from "../contract/PassMang.json";
+import { encryptData, decryptData } from "../utils/EncDecFuncs";
 
 const AuthProvider = ({ children }) => {
   const [page, setPage] = useState("login");
@@ -23,31 +24,72 @@ const AuthProvider = ({ children }) => {
       if (data.contractStatus == undefined) setContractStatus(false);
       else setContractStatus(true);
     });
+    const loginHandller = async () => {
+      await chrome.storage.local.get("token", (data) => {
+        console.log("token data", data.token);
+        if (data.token == null) {
+          setPage("login");
+          return;
+        }
+        chrome.runtime.sendMessage(
+          {
+            type: "CALL_CONTRACT_FUNCTION",
+            payload: {
+              contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
+              abi: abi,
+              functionName: "isUserRegister",
+              args: [],
+            },
+          },
+          (response) => {
+            if (!response.success) {
+              console.error(
+                "Runtime error:",
+                chrome.runtime.lastError?.message || response.error
+              );
+              return;
+            }
+            console.log("Get response for call function", response);
+            if (response.data) {
+              setPage("dashboard");
+              setUser(userData);
+              // chrome.storage.local.set({ user: userData });
+            } else {
+              alert("User not registered!");
+              return;
+            }
+          }
+        );
+      });
+    };
+    loginHandller();
   }, []);
 
-  useEffect(() => {
-    chrome.storage.local.get("user", (data) => {
-      if (data == null || data.user == null) {
-        setPage("login");
-      } else {
-        setPage("dashboard");
-      }
-    });
+  // useEffect(() => {
+  //   chrome.storage.local.get("user", (data) => {
+  //     if (data == null || data.user == null) {
+  //       setPage("login");
+  //     } else {
+  //       setPage("dashboard");
+  //     }
+  //   });
 
-    // chrome.storage.local.get("page", (data) => {
-    //   if (data.page === "dashboard") {
-    //     setPage("dashboard");
-    //   } else if (data.page === "login") {
-    //     setPage("login");
-    //   }
-    // });
-  }, [user]);
+  //   // chrome.storage.local.get("page", (data) => {
+  //   //   if (data.page === "dashboard") {
+  //   //     setPage("dashboard");
+  //   //   } else if (data.page === "login") {
+  //   //     setPage("login");
+  //   //   }
+  //   // });
+  // }, [user]);
 
   const login = (userData) => {
     try {
       chrome.storage.local.get("passHash", (data) => {
-        const hashedPassword = sha256(userData.password);
-        if (data.passHash === hashedPassword) {
+        // const hashedPassword = sha256(userData.password);
+        // if (data.passHash === hashedPassword) {
+        const hashedPassword = decryptData(data.passHash);
+        if (hashedPassword === userData.password) {
           chrome.runtime.sendMessage(
             {
               type: "CALL_CONTRACT_FUNCTION",
@@ -68,9 +110,12 @@ const AuthProvider = ({ children }) => {
               }
               console.log("Get response for call function", response);
               if (response.data) {
+                chrome.storage.local.set({ token: sha256(hashedPassword) }, () => {
+                  console.log("Token saved to storage");
+                });
                 setPage("dashboard");
                 setUser(userData);
-                chrome.storage.local.set({ user: userData });
+                // chrome.storage.local.set({ user: userData });
               } else {
                 alert("User not registered!");
                 return;
@@ -100,6 +145,7 @@ const AuthProvider = ({ children }) => {
     setPage("login");
     chrome.storage.local.remove("user");
     chrome.storage.local.remove("page");
+    chrome.storage.local.remove("token");
   };
   // const createAccount = async (userData) => {
   //   const { passHash } = await chrome.storage.local.get("passHash");
@@ -143,7 +189,10 @@ const AuthProvider = ({ children }) => {
       return alert("Account already exists"); // Prevents multiple registrations in local storage
     }
 
-    const hashedPassword = sha256(userData.password);
+    // const hashedPassword = sha256(userData.password);
+    console.log("Registering user with password:", userData.password);
+    const hashedPassword = encryptData(userData.password);
+    console.log("hashedPassword", hashedPassword);
 
     // The previous code had the storage check *after* the contract call block,
     // and the contract call was not awaited, causing flow issues.
@@ -247,12 +296,14 @@ const AuthProvider = ({ children }) => {
         logout,
         createAccount,
         page,
+        setPage,
         connectWallet,
         address,
         contract,
         contractStatus,
         connectContract,
         WalletStatus,
+        setWalletStatus,
         setContractStatus,
       }}
     >

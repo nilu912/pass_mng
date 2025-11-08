@@ -1,178 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 import { abi } from "../contract/PassMang.json";
-import CryptoJS from "crypto-js";
-
-// Simple SVG Icons as components
-const Eye = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-    />
-  </svg>
-);
-
-const EyeOff = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-    />
-  </svg>
-);
-
-const Lock = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-    />
-  </svg>
-);
-
-const Globe = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-    />
-  </svg>
-);
-
-const User = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    />
-  </svg>
-);
-
-const RefreshCw = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-    />
-  </svg>
-);
-
-const Plus = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 4v16m8-8H4"
-    />
-  </svg>
-);
-
-const Copy = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-    />
-  </svg>
-);
-
-const Check = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M5 13l4 4L19 7"
-    />
-  </svg>
-);
-
-const Alert = ({ className = "" }) => (
-  <svg
-    className={className || "w-5 h-5"}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    />
-  </svg>
-);
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Globe,
+  User,
+  RefreshCw,
+  Plus,
+  Copy,
+  Check,
+  Alert,
+} from "../utils/svgIcons.jsx";
+import { encryptData, decryptData } from "../utils/EncDecFuncs.jsx";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const { logout, connectWallet, address } = useAuth();
+  const { logout, connectWallet } = useAuth();
   const [form, setForm] = useState({
     url: "",
     userName: "",
@@ -183,32 +27,22 @@ const Dashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswords, setShowPasswords] = useState({});
   const [copiedField, setCopiedField] = useState(null);
-  const [signature, setSignature] = useState("Idle");
-  const [contractStatus, setContractStatus] = useState("Not connected");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  // IMPORTANT: Use a secure encryption key (32 hex characters = 128 bits)
-  // In production, derive this from the user's master password
-  const ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef";
+  const [walletAddress, setWalletAddress] = useState("");
+  const [autoFillEnabled, setAutoFillEnabled] = useState(false);
+  // const [currentSiteUrl, setCurrentSiteUrl] = useState("");
 
   useEffect(() => {
-    chrome.storage.local.get("user", (data) => {
-      setUser(data);
-      console.log(data);
+    chrome.storage.local.get("walletAddress", (data) => {
+      setWalletAddress(data.walletAddress);
     });
-
-    chrome.storage.local.get("signature", (data) => {
-      if (data.signature) {
-        setSignature(data.signature);
+    chrome.storage.local.get("autoFillEnabled", (data) => {
+      if (data) {
+        setAutoFillEnabled(data.autoFillEnabled);
       }
     });
-
-    chrome.storage.local.get("contractStatus", (data) => {
-      if (data.contractStatus) {
-        setContractStatus(data.contractStatus);
-      }
-    });
+    fetchAndDecryptEntries();
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = new URL(tabs[0].url);
@@ -216,32 +50,12 @@ const Dashboard = () => {
     });
   }, []);
 
-  // Update this function in your Dashboard.jsx
-
-  // Add these state variables at the top with your other states
-  const [filteredEntries, setFilteredEntries] = useState([]);
-  const [currentSiteUrl, setCurrentSiteUrl] = useState("");
-  const [autoFillEnabled, setAutoFillEnabled] = useState(false);
-
   const setAutoFillHandler = () => {
     chrome.storage.local.set({
       autoFillEnabled: !autoFillEnabled,
     });
-
     setAutoFillEnabled(!autoFillEnabled);
   };
-  // Add this useEffect to auto-fetch entries when component mounts
-  useEffect(() => {
-    // Auto-fetch entries when dashboard loads
-    chrome.storage.local.get("autoFillEnabled", (data) => {
-      if (data) {
-        setAutoFillEnabled(data.autoFillEnabled);
-      }
-    });
-    fetchAndDecryptEntries();
-  }, []); // Empty dependency array means this runs once on mount
-
-  // Add this useEffect to filter and auto-fill based on current URL
   useEffect(() => {
     if (decryptedEntries.length === 0) return;
 
@@ -250,8 +64,8 @@ const Dashboard = () => {
         try {
           const url = new URL(tabs[0].url);
           const hostname = url.hostname.replace("www.", "");
-          setCurrentSiteUrl(hostname);
-          console.log("📍 Current site:", hostname);
+          // setCurrentSiteUrl(hostname);
+          // console.log("📍 Current site:", hostname);
 
           // Filter entries that match current site
           const matching = decryptedEntries.filter((entry) => {
@@ -273,7 +87,7 @@ const Dashboard = () => {
             );
           });
 
-          setFilteredEntries(matching);
+          // setFilteredEntries(matching);
           console.log(
             `🔍 Found ${matching.length} matching credentials for ${hostname}`
           );
@@ -290,7 +104,8 @@ const Dashboard = () => {
         }
       }
     });
-  }, [decryptedEntries, autoFillEnabled]); // Re-run when entries change or auto-fill is toggled
+  }, [decryptedEntries, autoFillEnabled]);
+
   const autofill = async (entry) => {
     // Check if username and password are valid
     if (
@@ -346,7 +161,6 @@ const Dashboard = () => {
         fullCurrentUrl: tab.url,
       });
 
-      // Check if URLs match
       if (
         !currentHostname.includes(savedHostname) &&
         !savedHostname.includes(currentHostname)
@@ -496,118 +310,6 @@ const Dashboard = () => {
     }
   }, [successMessage]);
 
-  /**
-   * Encrypts data using AES-256-CBC
-   * @param {string} plaintext - The data to encrypt
-   * @returns {string} - Format: "IV_HEX:CIPHERTEXT_BASE64"
-   */
-  function encryptData(plaintext) {
-    try {
-      if (!plaintext) {
-        throw new Error("No data to encrypt");
-      }
-
-      // Convert to string
-      const data = String(plaintext);
-
-      // Generate random 16-byte IV
-      const iv = CryptoJS.lib.WordArray.random(16);
-
-      // Parse encryption key from hex string
-      const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY);
-
-      // Encrypt using AES-CBC
-      const encrypted = CryptoJS.AES.encrypt(data, key, {
-        iv: iv,
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7,
-      });
-
-      // Format: IV (as hex) : Ciphertext (as base64)
-      const result = iv.toString(CryptoJS.enc.Hex) + ":" + encrypted.toString();
-
-      console.log("✅ Encrypted:", {
-        original: data.substring(0, 20) + "...",
-        ivLength: iv.toString(CryptoJS.enc.Hex).length,
-        result: result.substring(0, 50) + "...",
-      });
-
-      return result;
-    } catch (error) {
-      console.error("❌ Encryption error:", error);
-      throw new Error("Encryption failed: " + error.message);
-    }
-  }
-
-  /**
-   * Decrypts data encrypted with encryptData function
-   * @param {string} ciphertext - Format: "IV_HEX:CIPHERTEXT_BASE64"
-   * @returns {string} - The decrypted plaintext
-   */
-  function decryptData(ciphertext) {
-    try {
-      // Validate input
-      if (!ciphertext || typeof ciphertext !== "string") {
-        console.error("❌ Invalid ciphertext:", typeof ciphertext);
-        return "[Invalid Data]";
-      }
-
-      // Split IV and encrypted data
-      const parts = ciphertext.split(":");
-      if (parts.length !== 2) {
-        console.error(
-          "❌ Invalid format. Expected 'IV:CIPHERTEXT', got:",
-          ciphertext.substring(0, 50)
-        );
-        return "[Invalid Format]";
-      }
-
-      const ivHex = parts[0];
-      const encryptedData = parts[1];
-
-      // Validate IV length (should be 32 hex characters = 16 bytes)
-      if (ivHex.length !== 32) {
-        console.error("❌ Invalid IV length:", ivHex.length, "expected 32");
-        return "[Invalid IV]";
-      }
-
-      console.log("🔓 Decrypting:", {
-        ivHex: ivHex,
-        encryptedLength: encryptedData.length,
-      });
-
-      // Parse IV from hex string
-      const iv = CryptoJS.enc.Hex.parse(ivHex);
-
-      // Parse key from hex string
-      const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY);
-
-      // Decrypt using AES-CBC
-      const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
-        iv: iv,
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7,
-      });
-
-      // Convert to UTF-8 string
-      const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
-
-      if (!plaintext || plaintext.length === 0) {
-        console.error("❌ Decryption produced empty result");
-        return "[Decryption Failed]";
-      }
-
-      console.log(
-        "✅ Decrypted successfully:",
-        plaintext.substring(0, 20) + "..."
-      );
-      return plaintext;
-    } catch (error) {
-      console.error("❌ Decryption error:", error.message);
-      return "[Error: " + error.message + "]";
-    }
-  }
-
   const inputHandler = (e) => {
     const { name, value } = e.target;
     setForm({
@@ -628,6 +330,7 @@ const Dashboard = () => {
 
     try {
       console.log("\n=== Starting Encryption Process ===");
+      console.log("\n=== Submitting New Password Entry ===");
 
       // Encrypt username and password
       const encryptedUserName = encryptData(form.userName);
@@ -844,28 +547,6 @@ const Dashboard = () => {
       });
   };
 
-  const connectContract = () => {
-    chrome.runtime.sendMessage({ type: "CONNECT_MY_CONTRACT" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Runtime error:", chrome.runtime.lastError.message);
-        setErrorMessage(
-          "Failed to connect contract: " + chrome.runtime.lastError.message
-        );
-        return;
-      }
-
-      if (!response || !response.reply) {
-        console.error("Invalid response format:", response);
-        setErrorMessage("Invalid response from contract connection");
-        return;
-      }
-
-      setContractStatus(response.reply);
-      chrome.storage.local.set({ contractStatus: response.reply });
-      setSuccessMessage("Contract connected successfully!");
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -953,7 +634,7 @@ const Dashboard = () => {
                 Wallet Connection
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <button
                   onClick={connectWallet}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -966,7 +647,7 @@ const Dashboard = () => {
                 >
                   Connect Contract
                 </button>
-              </div>
+              </div> */}
 
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 space-y-3 border border-gray-200">
                 <div className="flex items-center justify-between">
@@ -974,10 +655,10 @@ const Dashboard = () => {
                     Wallet Address
                   </span>
                   <span className="text-gray-600 font-mono text-xs truncate ml-2 max-w-xs">
-                    {address || "Not connected"}
+                    {walletAddress || "Not connected"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-700 text-sm">
                     Contract Status
                   </span>
@@ -988,9 +669,9 @@ const Dashboard = () => {
                         : "bg-green-100 text-green-700"
                     }`}
                   >
-                    {contractStatus}
+                    {contractStatus ? "Connected" : "Not connected"}
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
 

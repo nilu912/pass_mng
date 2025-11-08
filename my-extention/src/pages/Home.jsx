@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuth } from "../context/authContext";
 import Login from "./login";
-import Dashboard from "./dashbord";
+import Dashboard from "./Dashbord";
 
 const Home = () => {
   const { page } = useAuth();
