@@ -1,6 +1,15 @@
 // A simple background script for a MetaMask connection
 console.log("Background script loaded");
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "CHECK_CREDENTIALS") {
+    chrome.storage.sync.get(message.url, (data) => {
+      sendResponse(data[message.url] || null);
+    });
+    return true;
+  }
+});
+
 // Listener for messages from the popup or content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "CONNECT_WALLET") {
@@ -26,7 +35,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       functionName,
       args
     );
-    callContractFunction(contractAddress, abi, functionName, args, sendResponse);
+    callContractFunction(
+      contractAddress,
+      abi,
+      functionName,
+      args,
+      sendResponse
+    );
     return true; // IMPORTANT for async
   }
 
@@ -48,16 +63,16 @@ async function ensureEthersLoaded(tabId) {
       target: { tabId: tabId },
       world: "MAIN",
       func: () => {
-        return typeof window.ethers !== 'undefined';
-      }
+        return typeof window.ethers !== "undefined";
+      },
     });
-    
+
     // If ethers is already loaded, return
     if (checkResults && checkResults[0] && checkResults[0].result) {
       console.log("Ethers.js already loaded");
       return true;
     }
-    
+
     // Otherwise, inject it
     console.log("Injecting ethers.js...");
     await chrome.scripting.executeScript({
@@ -65,7 +80,7 @@ async function ensureEthersLoaded(tabId) {
       world: "MAIN",
       files: ["ethers.min.js"],
     });
-    
+
     // Wait for it to load
     await new Promise((resolve) => setTimeout(resolve, 500));
     return true;
@@ -202,407 +217,407 @@ async function connectSmartContract(sendResponse) {
 
     const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const contractABI = [
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "uniqueHash",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "webUrl",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "userName",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "password",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "passwordAddedEvent",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "hashedPass",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "salt",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "userRegisteredEvent",
-      "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_webUrl",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_userName",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_password",
-          "type": "string"
-        }
-      ],
-      "name": "addPasswordEntry",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_id",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPasswordEntry",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "uniqueHash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "string",
-              "name": "webUrl",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "userName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "password",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct PassMang.PasswordEntry",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUserInfo",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bytes32",
-              "name": "masterPasswordHash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "salt",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            },
-            {
-              "internalType": "uint256",
-              "name": "totalEntries",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct PassMang.User",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUsersAllEntries",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "uniqueHash",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "string",
-              "name": "webUrl",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "userName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "password",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct PassMang.PasswordEntry[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "isUserRegister",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "passwordEntries",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "uniqueHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "string",
-          "name": "webUrl",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "userName",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "password",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_masterPassword",
-          "type": "string"
-        }
-      ],
-      "name": "registerUser",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "registeredUser",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "name": "uniqueHashExists",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "users",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "masterPasswordHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "salt",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalEntries",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "address",
+            name: "user",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "uniqueHash",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "string",
+            name: "webUrl",
+            type: "string",
+          },
+          {
+            indexed: false,
+            internalType: "string",
+            name: "userName",
+            type: "string",
+          },
+          {
+            indexed: false,
+            internalType: "string",
+            name: "password",
+            type: "string",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        name: "passwordAddedEvent",
+        type: "event",
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "address",
+            name: "user",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "hashedPass",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "bytes32",
+            name: "salt",
+            type: "bytes32",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        name: "userRegisteredEvent",
+        type: "event",
+      },
+      {
+        inputs: [
+          {
+            internalType: "string",
+            name: "_webUrl",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "_userName",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "_password",
+            type: "string",
+          },
+        ],
+        name: "addPasswordEntry",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "uint256",
+            name: "_id",
+            type: "uint256",
+          },
+        ],
+        name: "getPasswordEntry",
+        outputs: [
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "id",
+                type: "uint256",
+              },
+              {
+                internalType: "bytes32",
+                name: "uniqueHash",
+                type: "bytes32",
+              },
+              {
+                internalType: "string",
+                name: "webUrl",
+                type: "string",
+              },
+              {
+                internalType: "string",
+                name: "userName",
+                type: "string",
+              },
+              {
+                internalType: "string",
+                name: "password",
+                type: "string",
+              },
+              {
+                internalType: "uint256",
+                name: "timestamp",
+                type: "uint256",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct PassMang.PasswordEntry",
+            name: "",
+            type: "tuple",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "getUserInfo",
+        outputs: [
+          {
+            components: [
+              {
+                internalType: "bytes32",
+                name: "masterPasswordHash",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "salt",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint256",
+                name: "timestamp",
+                type: "uint256",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+              {
+                internalType: "uint256",
+                name: "totalEntries",
+                type: "uint256",
+              },
+            ],
+            internalType: "struct PassMang.User",
+            name: "",
+            type: "tuple",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "getUsersAllEntries",
+        outputs: [
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "id",
+                type: "uint256",
+              },
+              {
+                internalType: "bytes32",
+                name: "uniqueHash",
+                type: "bytes32",
+              },
+              {
+                internalType: "string",
+                name: "webUrl",
+                type: "string",
+              },
+              {
+                internalType: "string",
+                name: "userName",
+                type: "string",
+              },
+              {
+                internalType: "string",
+                name: "password",
+                type: "string",
+              },
+              {
+                internalType: "uint256",
+                name: "timestamp",
+                type: "uint256",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct PassMang.PasswordEntry[]",
+            name: "",
+            type: "tuple[]",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "isUserRegister",
+        outputs: [
+          {
+            internalType: "bool",
+            name: "",
+            type: "bool",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "",
+            type: "uint256",
+          },
+        ],
+        name: "passwordEntries",
+        outputs: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "uniqueHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "string",
+            name: "webUrl",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "userName",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "password",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isActive",
+            type: "bool",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "string",
+            name: "_masterPassword",
+            type: "string",
+          },
+        ],
+        name: "registerUser",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "",
+            type: "address",
+          },
+        ],
+        name: "registeredUser",
+        outputs: [
+          {
+            internalType: "bool",
+            name: "",
+            type: "bool",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "bytes32",
+            name: "",
+            type: "bytes32",
+          },
+        ],
+        name: "uniqueHashExists",
+        outputs: [
+          {
+            internalType: "bool",
+            name: "",
+            type: "bool",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "",
+            type: "address",
+          },
+        ],
+        name: "users",
+        outputs: [
+          {
+            internalType: "bytes32",
+            name: "masterPasswordHash",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "salt",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isActive",
+            type: "bool",
+          },
+          {
+            internalType: "uint256",
+            name: "totalEntries",
+            type: "uint256",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+    ];
 
     // Inject ethers.js library
     const ethersLoaded = await ensureEthersLoaded(tab.id);
@@ -630,12 +645,12 @@ async function connectSmartContract(sendResponse) {
             const accounts = await provider.send("eth_requestAccounts", []);
             const signer = await provider.getSigner();
             const contractInstance = new ethers.Contract(address, abi, signer);
-            
+
             // Store in window for reuse
             window.CONTRACT_INSTANCE = contractInstance;
             window.CONTRACT_ADDRESS = address;
             window.CONTRACT_ABI = abi;
-            
+
             resolve({ success: true, account: accounts[0] });
           } catch (error) {
             resolve({ success: false, error: error.message });
@@ -663,7 +678,13 @@ async function connectSmartContract(sendResponse) {
 /**
  * Call a contract function (read or write)
  */
-async function callContractFunction(contractAddress, abi, functionName, args, sendResponse) {
+async function callContractFunction(
+  contractAddress,
+  abi,
+  functionName,
+  args,
+  sendResponse
+) {
   try {
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -698,7 +719,7 @@ async function callContractFunction(contractAddress, abi, functionName, args, se
 
             // Refresh provider to get latest blockchain state
             const provider = new ethers.BrowserProvider(window.ethereum);
-            
+
             // Force refresh by getting current block
             try {
               await provider.getBlockNumber();
@@ -718,7 +739,7 @@ async function callContractFunction(contractAddress, abi, functionName, args, se
 
             // Call the function
             const result = await contract[funcName](...(funcArgs || []));
-            
+
             // If it's a transaction, wait for it
             if (result.wait) {
               const receipt = await result.wait();
@@ -726,13 +747,19 @@ async function callContractFunction(contractAddress, abi, functionName, args, se
             } else {
               // It's a view function, return the result directly
               // Convert BigInt to string for JSON serialization
-              const serializedResult = JSON.parse(JSON.stringify(result, (key, value) =>
-                typeof value === 'bigint' ? value.toString() : value
-              ));
+              const serializedResult = JSON.parse(
+                JSON.stringify(result, (key, value) =>
+                  typeof value === "bigint" ? value.toString() : value
+                )
+              );
               resolve({ success: true, data: serializedResult });
             }
           } catch (error) {
-            resolve({ success: false, error: error.message, stack: error.stack });
+            resolve({
+              success: false,
+              error: error.message,
+              stack: error.stack,
+            });
           }
         });
       },
@@ -740,7 +767,10 @@ async function callContractFunction(contractAddress, abi, functionName, args, se
     });
 
     if (!results || !results[0] || results[0].result === undefined) {
-      sendResponse({ success: false, error: "Failed to call contract function" });
+      sendResponse({
+        success: false,
+        error: "Failed to call contract function",
+      });
       return;
     }
 
@@ -802,7 +832,7 @@ async function createUser(contractAddress, abi, masterPassword, sendResponse) {
             // Call registerUser
             const tx = await contract.registerUser(password);
             const receipt = await tx.wait();
-            
+
             resolve({ success: true, account: receipt });
           } catch (error) {
             resolve({ success: false, error: error.message });

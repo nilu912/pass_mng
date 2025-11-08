@@ -5,63 +5,168 @@ import CryptoJS from "crypto-js";
 
 // Simple SVG Icons as components
 const Eye = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+    />
   </svg>
 );
 
 const EyeOff = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+    />
   </svg>
 );
 
 const Lock = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+    />
   </svg>
 );
 
 const Globe = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+    />
   </svg>
 );
 
 const User = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+    />
   </svg>
 );
 
 const RefreshCw = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
   </svg>
 );
 
 const Plus = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 4v16m8-8H4"
+    />
   </svg>
 );
 
 const Copy = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+    />
   </svg>
 );
 
 const Check = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M5 13l4 4L19 7"
+    />
   </svg>
 );
 
 const Alert = ({ className = "" }) => (
-  <svg className={className || "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  <svg
+    className={className || "w-5 h-5"}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    />
   </svg>
 );
 
@@ -104,9 +209,96 @@ const Dashboard = () => {
         setContractStatus(data.contractStatus);
       }
     });
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const url = new URL(tabs[0].url);
+      console.log(url.hostname);
+    });
   }, []);
 
-  // Clear messages after 5 seconds
+  // Update this function in your Dashboard.jsx
+
+  const autofill = async (entry) => {
+    // Check if username and password are valid (not error messages)
+    if (
+      entry.userName.includes("[Error") ||
+      entry.userName.includes("[Invalid") ||
+      entry.password.includes("[Error") ||
+      entry.password.includes("[Invalid")
+    ) {
+      setErrorMessage("Cannot autofill: Invalid or corrupted credentials");
+      return;
+    }
+
+    try {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (!tab || !tab.id) {
+        setErrorMessage("No active tab found");
+        return;
+      }
+
+      // Check if we can access this tab
+      if (
+        tab.url.startsWith("chrome://") ||
+        tab.url.startsWith("chrome-extension://")
+      ) {
+        setErrorMessage("Cannot autofill on Chrome internal pages");
+        return;
+      }
+
+      console.log("Attempting autofill on:", tab.url);
+
+      // First, ensure content script is injected
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["contentScript.js"],
+        });
+        console.log("Content script injected successfully");
+      } catch (injectError) {
+        // Content script might already be injected, that's okay
+        console.log(
+          "Content script already injected or injection failed:",
+          injectError.message
+        );
+      }
+
+      // Wait a moment for content script to initialize
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Now send the autofill message
+      chrome.tabs.sendMessage(
+        tab.id,
+        {
+          type: "AUTOFILL",
+          username: entry.userName,
+          password: entry.password,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Autofill error:", chrome.runtime.lastError);
+            setErrorMessage(
+              "Could not autofill. Make sure you're on a login page and try refreshing the page."
+            );
+          } else if (response && response.success) {
+            setSuccessMessage("✅ Credentials filled successfully!");
+            console.log("Autofill successful:", response.message);
+          } else {
+            setErrorMessage(
+              response?.message || "No login fields found on this page"
+            );
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Autofill error:", error);
+      setErrorMessage("Error: " + error.message);
+    }
+  }; // Clear messages after 5 seconds
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => setErrorMessage(""), 5000);
@@ -134,29 +326,29 @@ const Dashboard = () => {
 
       // Convert to string
       const data = String(plaintext);
-      
+
       // Generate random 16-byte IV
       const iv = CryptoJS.lib.WordArray.random(16);
-      
+
       // Parse encryption key from hex string
       const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY);
-      
+
       // Encrypt using AES-CBC
       const encrypted = CryptoJS.AES.encrypt(data, key, {
         iv: iv,
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7,
       });
-      
+
       // Format: IV (as hex) : Ciphertext (as base64)
       const result = iv.toString(CryptoJS.enc.Hex) + ":" + encrypted.toString();
-      
+
       console.log("✅ Encrypted:", {
         original: data.substring(0, 20) + "...",
         ivLength: iv.toString(CryptoJS.enc.Hex).length,
-        result: result.substring(0, 50) + "..."
+        result: result.substring(0, 50) + "...",
       });
-      
+
       return result;
     } catch (error) {
       console.error("❌ Encryption error:", error);
@@ -172,7 +364,7 @@ const Dashboard = () => {
   function decryptData(ciphertext) {
     try {
       // Validate input
-      if (!ciphertext || typeof ciphertext !== 'string') {
+      if (!ciphertext || typeof ciphertext !== "string") {
         console.error("❌ Invalid ciphertext:", typeof ciphertext);
         return "[Invalid Data]";
       }
@@ -180,7 +372,10 @@ const Dashboard = () => {
       // Split IV and encrypted data
       const parts = ciphertext.split(":");
       if (parts.length !== 2) {
-        console.error("❌ Invalid format. Expected 'IV:CIPHERTEXT', got:", ciphertext.substring(0, 50));
+        console.error(
+          "❌ Invalid format. Expected 'IV:CIPHERTEXT', got:",
+          ciphertext.substring(0, 50)
+        );
         return "[Invalid Format]";
       }
 
@@ -195,33 +390,35 @@ const Dashboard = () => {
 
       console.log("🔓 Decrypting:", {
         ivHex: ivHex,
-        encryptedLength: encryptedData.length
+        encryptedLength: encryptedData.length,
       });
 
       // Parse IV from hex string
       const iv = CryptoJS.enc.Hex.parse(ivHex);
-      
+
       // Parse key from hex string
       const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY);
-      
+
       // Decrypt using AES-CBC
       const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
         iv: iv,
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7,
       });
-      
+
       // Convert to UTF-8 string
       const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
-      
+
       if (!plaintext || plaintext.length === 0) {
         console.error("❌ Decryption produced empty result");
         return "[Decryption Failed]";
       }
-      
-      console.log("✅ Decrypted successfully:", plaintext.substring(0, 20) + "...");
+
+      console.log(
+        "✅ Decrypted successfully:",
+        plaintext.substring(0, 20) + "..."
+      );
       return plaintext;
-      
     } catch (error) {
       console.error("❌ Decryption error:", error.message);
       return "[Error: " + error.message + "]";
@@ -248,7 +445,7 @@ const Dashboard = () => {
 
     try {
       console.log("\n=== Starting Encryption Process ===");
-      
+
       // Encrypt username and password
       const encryptedUserName = encryptData(form.userName);
       const encryptedPassword = encryptData(form.password);
@@ -256,22 +453,22 @@ const Dashboard = () => {
       console.log("📦 Data prepared for blockchain:", {
         url: form.url,
         encryptedUserName: encryptedUserName.substring(0, 60) + "...",
-        encryptedPassword: encryptedPassword.substring(0, 60) + "..."
+        encryptedPassword: encryptedPassword.substring(0, 60) + "...",
       });
 
       // Verify encryption works by testing decryption
       const testUserName = decryptData(encryptedUserName);
       const testPassword = decryptData(encryptedPassword);
-      
+
       if (testUserName !== form.userName || testPassword !== form.password) {
         throw new Error("Encryption verification failed!");
       }
-      
+
       console.log("✅ Encryption verified successfully");
 
       // Find the addPasswordEntry function in ABI
       const addPasswordEntryAbi = abi.find(
-        item => item.name === "addPasswordEntry" && item.type === "function"
+        (item) => item.name === "addPasswordEntry" && item.type === "function"
       );
 
       console.log("📡 Calling smart contract...");
@@ -288,27 +485,27 @@ const Dashboard = () => {
         },
         (response) => {
           setIsSubmitting(false);
-          
+
           if (chrome.runtime.lastError) {
             const errorMsg = chrome.runtime.lastError.message;
             console.error("❌ Runtime error:", errorMsg);
             setErrorMessage(`Failed to add password entry: ${errorMsg}`);
             return;
           }
-          
+
           if (!response || !response.success) {
             const errorMsg = response?.error || "Unknown error";
             console.error("❌ Contract call failed:", errorMsg);
             setErrorMessage(`Failed to add password entry: ${errorMsg}`);
             return;
           }
-          
+
           console.log("✅ Password entry added to blockchain:", response);
           setSuccessMessage("Password entry added successfully!");
-          
+
           // Clear form
           setForm({ url: "", userName: "", password: "" });
-          
+
           // Fetch updated entries after 1 second
           setTimeout(() => {
             fetchAndDecryptEntries();
@@ -325,9 +522,9 @@ const Dashboard = () => {
   const fetchAndDecryptEntries = () => {
     setIsLoading(true);
     setErrorMessage("");
-    
+
     console.log("\n=== Fetching Password Entries ===");
-    
+
     chrome.runtime.sendMessage(
       {
         type: "CALL_CONTRACT_FUNCTION",
@@ -340,23 +537,23 @@ const Dashboard = () => {
       },
       (response) => {
         setIsLoading(false);
-        
+
         if (chrome.runtime.lastError) {
           const error = chrome.runtime.lastError.message;
           console.error("❌ Runtime error:", error);
           setErrorMessage("Failed to fetch entries: " + error);
           return;
         }
-        
+
         if (!response || !response.success) {
           const error = response?.error || "Unknown error";
           console.error("❌ Contract call failed:", error);
           setErrorMessage("Failed to fetch entries: " + error);
           return;
         }
-        
+
         console.log("📥 Raw data from blockchain:", response.data);
-        
+
         if (!response.data || !Array.isArray(response.data)) {
           console.error("❌ Invalid response format");
           setErrorMessage("Invalid data format from contract");
@@ -373,11 +570,11 @@ const Dashboard = () => {
         //     uint timestamp;       // index 5
         //     bool isActive;        // index 6
         // }
-        
+
         const decrypted = response.data.map((entry, idx) => {
           try {
             console.log(`\n--- Processing Entry ${idx + 1} ---`);
-            
+
             // Extract data from contract response
             // The entry might be an object or array depending on your web3 library
             const id = entry.id || entry[0];
@@ -385,14 +582,15 @@ const Dashboard = () => {
             const encryptedUserName = entry.userName || entry[3];
             const encryptedPassword = entry.password || entry[4];
             const timestamp = entry.timestamp || entry[5];
-            const isActive = entry.isActive !== undefined ? entry.isActive : entry[6];
+            const isActive =
+              entry.isActive !== undefined ? entry.isActive : entry[6];
 
             console.log("📦 Entry data:", {
               id: id?.toString(),
               webUrl: webUrl,
               encryptedUserName: encryptedUserName?.substring(0, 50) + "...",
               encryptedPassword: encryptedPassword?.substring(0, 50) + "...",
-              timestamp: timestamp?.toString()
+              timestamp: timestamp?.toString(),
             });
 
             // Decrypt username and password
@@ -401,7 +599,7 @@ const Dashboard = () => {
 
             console.log("🔓 Decrypted:", {
               userName: decryptedUserName,
-              password: decryptedPassword.substring(0, 10) + "..."
+              password: decryptedPassword.substring(0, 10) + "...",
             });
 
             return {
@@ -409,8 +607,8 @@ const Dashboard = () => {
               url: webUrl || "Unknown",
               userName: decryptedUserName,
               password: decryptedPassword,
-              timestamp: timestamp 
-                ? new Date(Number(timestamp) * 1000).toLocaleString() 
+              timestamp: timestamp
+                ? new Date(Number(timestamp) * 1000).toLocaleString()
                 : "N/A",
               isActive: isActive !== undefined ? Boolean(isActive) : true,
             };
@@ -426,7 +624,7 @@ const Dashboard = () => {
             };
           }
         });
-        
+
         console.log("\n✅ All entries processed:", decrypted.length);
         setDecryptedEntries(decrypted);
       }
@@ -434,33 +632,42 @@ const Dashboard = () => {
   };
 
   const togglePasswordVisibility = (id) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
   const copyToClipboard = (text, field) => {
     // Don't copy error messages
-    if (text.includes("[Error") || text.includes("[Invalid") || text.includes("[Decryption Failed]")) {
+    if (
+      text.includes("[Error") ||
+      text.includes("[Invalid") ||
+      text.includes("[Decryption Failed]")
+    ) {
       setErrorMessage("Cannot copy error message");
       return;
     }
-    
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(null), 2000);
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      setErrorMessage("Failed to copy to clipboard");
-    });
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy:", err);
+        setErrorMessage("Failed to copy to clipboard");
+      });
   };
 
   const connectContract = () => {
     chrome.runtime.sendMessage({ type: "CONNECT_MY_CONTRACT" }, (response) => {
       if (chrome.runtime.lastError) {
         console.error("Runtime error:", chrome.runtime.lastError.message);
-        setErrorMessage("Failed to connect contract: " + chrome.runtime.lastError.message);
+        setErrorMessage(
+          "Failed to connect contract: " + chrome.runtime.lastError.message
+        );
         return;
       }
 
@@ -490,7 +697,9 @@ const Dashboard = () => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   Password Manager
                 </h1>
-                <p className="text-gray-600 mt-1">Secure blockchain-based password storage</p>
+                <p className="text-gray-600 mt-1">
+                  Secure blockchain-based password storage
+                </p>
               </div>
             </div>
             <button
@@ -510,9 +719,16 @@ const Dashboard = () => {
               <p className="text-red-800 font-medium">Error</p>
               <p className="text-red-700 text-sm mt-1">{errorMessage}</p>
             </div>
-            <button onClick={() => setErrorMessage("")} className="text-red-500 hover:text-red-700">
+            <button
+              onClick={() => setErrorMessage("")}
+              className="text-red-500 hover:text-red-700"
+            >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           </div>
@@ -525,9 +741,16 @@ const Dashboard = () => {
               <p className="text-green-800 font-medium">Success</p>
               <p className="text-green-700 text-sm mt-1">{successMessage}</p>
             </div>
-            <button onClick={() => setSuccessMessage("")} className="text-green-500 hover:text-green-700">
+            <button
+              onClick={() => setSuccessMessage("")}
+              className="text-green-500 hover:text-green-700"
+            >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           </div>
@@ -542,7 +765,7 @@ const Dashboard = () => {
                 <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
                 Wallet Connection
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <button
                   onClick={connectWallet}
@@ -560,18 +783,24 @@ const Dashboard = () => {
 
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 space-y-3 border border-gray-200">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700 text-sm">Wallet Address</span>
+                  <span className="font-semibold text-gray-700 text-sm">
+                    Wallet Address
+                  </span>
                   <span className="text-gray-600 font-mono text-xs truncate ml-2 max-w-xs">
                     {address || "Not connected"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700 text-sm">Contract Status</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    contractStatus === "Not connected" 
-                      ? "bg-gray-200 text-gray-700" 
-                      : "bg-green-100 text-green-700"
-                  }`}>
+                  <span className="font-semibold text-gray-700 text-sm">
+                    Contract Status
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      contractStatus === "Not connected"
+                        ? "bg-gray-200 text-gray-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
                     {contractStatus}
                   </span>
                 </div>
@@ -584,7 +813,7 @@ const Dashboard = () => {
                 <Plus className="text-indigo-600" />
                 Add New Password Entry
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -600,7 +829,7 @@ const Dashboard = () => {
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-gray-50 hover:bg-white"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     <User className="inline w-4 h-4 mr-1 text-indigo-600" />
@@ -615,7 +844,7 @@ const Dashboard = () => {
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-gray-50 hover:bg-white"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     <Lock className="inline w-4 h-4 mr-1 text-indigo-600" />
@@ -630,7 +859,7 @@ const Dashboard = () => {
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-gray-50 hover:bg-white"
                   />
                 </div>
-                
+
                 <button
                   onClick={submitHandler}
                   disabled={isSubmitting}
@@ -665,13 +894,17 @@ const Dashboard = () => {
                   className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg transition-colors disabled:opacity-50"
                   title="Refresh entries"
                 >
-                  <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`}
+                  />
                 </button>
               </div>
 
               <div className="mb-4">
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-4 text-center">
-                  <div className="text-4xl font-bold">{decryptedEntries.length}</div>
+                  <div className="text-4xl font-bold">
+                    {decryptedEntries.length}
+                  </div>
                   <div className="text-sm opacity-90 mt-1">Total Entries</div>
                 </div>
               </div>
@@ -680,8 +913,12 @@ const Dashboard = () => {
                 {decryptedEntries.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Lock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm font-medium">No passwords saved yet</p>
-                    <p className="text-xs mt-1">Start by adding your first entry</p>
+                    <p className="text-sm font-medium">
+                      No passwords saved yet
+                    </p>
+                    <p className="text-xs mt-1">
+                      Start by adding your first entry
+                    </p>
                   </div>
                 ) : (
                   decryptedEntries.map((entry) => (
@@ -692,23 +929,33 @@ const Dashboard = () => {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <Globe className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                          <span className="font-semibold text-gray-800 truncate text-sm">{entry.url}</span>
+                          <span className="font-semibold text-gray-800 truncate text-sm">
+                            {entry.url}
+                          </span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
-                          entry.isActive 
-                            ? "bg-green-100 text-green-700" 
-                            : "bg-red-100 text-red-700"
-                        }`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                            entry.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
                           {entry.isActive ? "Active" : "Inactive"}
                         </span>
                       </div>
-                      
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <User className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                          <span className="font-mono text-xs text-gray-700 truncate flex-1">{entry.userName}</span>
+                          <span className="font-mono text-xs text-gray-700 truncate flex-1">
+                            {entry.userName}
+                          </span>
                           <button
-                            onClick={() => copyToClipboard(entry.userName, `user-${entry.id}`)}
+                            onClick={() =>
+                              copyToClipboard(
+                                entry.userName,
+                                `user-${entry.id}`
+                              )
+                            }
                             className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
                             title="Copy username"
                           >
@@ -719,11 +966,13 @@ const Dashboard = () => {
                             )}
                           </button>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           <Lock className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
                           <span className="font-mono text-xs text-gray-700 flex-1">
-                            {showPasswords[entry.id] ? entry.password : "••••••••"}
+                            {showPasswords[entry.id]
+                              ? entry.password
+                              : "••••••••"}
                           </span>
                           <button
                             onClick={() => togglePasswordVisibility(entry.id)}
@@ -737,7 +986,12 @@ const Dashboard = () => {
                             )}
                           </button>
                           <button
-                            onClick={() => copyToClipboard(entry.password, `pass-${entry.id}`)}
+                            onClick={() =>
+                              copyToClipboard(
+                                entry.password,
+                                `pass-${entry.id}`
+                              )
+                            }
                             className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
                             title="Copy password"
                           >
@@ -749,7 +1003,26 @@ const Dashboard = () => {
                           </button>
                         </div>
                       </div>
-                      
+                      {/* In the password entry card */}
+                      <button
+                        onClick={() => autofill(entry)}
+                        className="w-full mt-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 px-4 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          />
+                        </svg>
+                        Fill Data
+                      </button>{" "}
                       <div className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">
                         {entry.timestamp}
                       </div>
@@ -772,7 +1045,9 @@ const Dashboard = () => {
               disabled={isLoading}
               className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2.5 px-5 rounded-xl transition-all duration-200 font-medium disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               {isLoading ? "Loading..." : "Refresh All"}
             </button>
           </div>
@@ -783,8 +1058,12 @@ const Dashboard = () => {
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Lock className="w-12 h-12 text-indigo-300" />
                 </div>
-                <p className="text-lg font-semibold mb-2">No password entries found</p>
-                <p className="text-sm text-gray-400">Add your first password to get started with secure storage!</p>
+                <p className="text-lg font-semibold mb-2">
+                  No password entries found
+                </p>
+                <p className="text-sm text-gray-400">
+                  Add your first password to get started with secure storage!
+                </p>
               </div>
             ) : (
               decryptedEntries.map((entry) => (
@@ -795,29 +1074,46 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Website URL</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Website URL
+                        </label>
                         <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
                           <Globe className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                          <span className="font-semibold text-gray-800 truncate">{entry.url}</span>
+                          <span className="font-semibold text-gray-800 truncate">
+                            {entry.url}
+                          </span>
                         </div>
                       </div>
-                      
+
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Entry ID</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Entry ID
+                        </label>
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span className="font-mono text-sm text-gray-700">#{entry.id}</span>
+                          <span className="font-mono text-sm text-gray-700">
+                            #{entry.id}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Username / Email</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Username / Email
+                        </label>
                         <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
                           <User className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                          <span className="font-mono text-sm text-gray-800 truncate flex-1">{entry.userName}</span>
+                          <span className="font-mono text-sm text-gray-800 truncate flex-1">
+                            {entry.userName}
+                          </span>
                           <button
-                            onClick={() => copyToClipboard(entry.userName, `user-detail-${entry.id}`)}
+                            onClick={() =>
+                              copyToClipboard(
+                                entry.userName,
+                                `user-detail-${entry.id}`
+                              )
+                            }
                             className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
                             title="Copy username"
                           >
@@ -829,18 +1125,26 @@ const Dashboard = () => {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Password
+                        </label>
                         <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200">
                           <Lock className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                           <span className="font-mono text-sm text-gray-800 flex-1">
-                            {showPasswords[entry.id] ? entry.password : "••••••••••••"}
+                            {showPasswords[entry.id]
+                              ? entry.password
+                              : "••••••••••••"}
                           </span>
                           <button
                             onClick={() => togglePasswordVisibility(entry.id)}
                             className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
-                            title={showPasswords[entry.id] ? "Hide password" : "Show password"}
+                            title={
+                              showPasswords[entry.id]
+                                ? "Hide password"
+                                : "Show password"
+                            }
                           >
                             {showPasswords[entry.id] ? (
                               <EyeOff className="w-4 h-4 text-indigo-600" />
@@ -849,7 +1153,12 @@ const Dashboard = () => {
                             )}
                           </button>
                           <button
-                            onClick={() => copyToClipboard(entry.password, `pass-detail-${entry.id}`)}
+                            onClick={() =>
+                              copyToClipboard(
+                                entry.password,
+                                `pass-detail-${entry.id}`
+                              )
+                            }
                             className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0"
                             title="Copy password"
                           >
@@ -865,23 +1174,33 @@ const Dashboard = () => {
 
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Date Added</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Date Added
+                        </label>
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span className="text-sm text-gray-700">{entry.timestamp}</span>
+                          <span className="text-sm text-gray-700">
+                            {entry.timestamp}
+                          </span>
                         </div>
                       </div>
-                      
+
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Status</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                          Status
+                        </label>
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                            entry.isActive 
-                              ? "bg-green-100 text-green-700" 
-                              : "bg-red-100 text-red-700"
-                          }`}>
-                            <span className={`w-2 h-2 rounded-full mr-2 ${
-                              entry.isActive ? "bg-green-500" : "bg-red-500"
-                            }`}></span>
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                              entry.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            <span
+                              className={`w-2 h-2 rounded-full mr-2 ${
+                                entry.isActive ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            ></span>
                             {entry.isActive ? "Active" : "Inactive"}
                           </span>
                         </div>
@@ -916,11 +1235,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
-
-
 
 // import React, { useEffect, useState } from "react";
 // import { useAuth } from "../context/authContext";
@@ -1054,13 +1368,13 @@ export default Dashboard;
 //   const parts = ciphertext.split(":");
 //   const iv = CryptoJS.enc.Hex.parse(parts[0]);
 //   const encrypted = parts[1];
-  
+
 //   const bytes = CryptoJS.AES.decrypt(encrypted, key, {
 //     iv: iv,
 //     mode: CryptoJS.mode.CBC,
 //     padding: CryptoJS.pad.Pkcs7,
 //   });
-  
+
 //   return bytes.toString(CryptoJS.enc.Utf8);
 // }
 
@@ -1360,20 +1674,6 @@ export default Dashboard;
 // };
 
 // export default Dashboard;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useEffect, useState } from "react";
 // import { useAuth } from "../context/authContext";
